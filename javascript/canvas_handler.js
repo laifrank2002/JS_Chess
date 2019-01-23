@@ -16,7 +16,7 @@ var Canvas = (
 		// private fields
 		var canvas;
 		var context;
-		
+				
 		return {
 			get canvas() {return canvas},
 			
@@ -33,6 +33,15 @@ var Canvas = (
 				
 				// clear and draw
 				context.clearRect(0, 0, canvas.width, canvas.height);
+				
+				/*
+				 * save() allows us to save the canvas context before
+				 * defining the clipping region so that we can return
+				 * to the default state later on
+				 */
+				context.save();
+				// reset 
+				context.strokeStyle = "black";
 				
 				context.beginPath();
 				context.rect(0,0,canvas.width, canvas.height);
@@ -102,6 +111,7 @@ var Canvas = (
 				var axis_text_y = Engine.axis_text_y;
 				var font_size = Engine.font_size;
 				
+				
 				// background 
 				for (var x = 0; x < width; x++)
 				{
@@ -144,7 +154,7 @@ var Canvas = (
 			draw_infopanel: function()
 			{
 				context.beginPath();
-				context.fillStyle = "brown";
+				context.fillStyle = "#ba5b25";
 				context.rect(0,0,200,600);
 				context.fill();
 				context.stroke();
@@ -161,7 +171,55 @@ var Canvas = (
 				context.fillText("Player: " + Engine.player,20,90);
 				context.font = "15px Times New Roman";
 				context.fillText("Turn: " + Engine.turns,20,105);
+				
+				// message_box
+				Canvas.draw_message_box(20,120);
 			},
+			
+			draw_message_box: function(x,y)
+			{
+				context.beginPath();
+				context.strokeStyle = "#bc612d";
+				context.fillStyle = "#eda580";
+				context.rect(x,y,x+140,y+300);
+				context.fill();
+				context.clip(); // messages don't go out of the box!
+				context.stroke();
+				
+				context.fillStyle = "white";
+				// draw each of the information from the engine;
+				var LINE_CHAR_MAX = 20;
+				var message_box = Engine.message_box;
+				var current_text_position = 0;
+				
+				var scroll_offset_y = 0; // scrolling!
+				
+				for (var index = 0; index < message_box.length; index++)
+				{					
+					var words = message_box[index].split(" "); // seperate by words, dumbly.
+					var word_index = 0;
+					do
+					{
+						var current_line = "";
+						
+						while(current_line.length < LINE_CHAR_MAX && word_index < words.length)
+						{
+							current_line += words[word_index] + " ";
+							word_index++;
+						}
+						console.log(current_line);
+						context.fillText(current_line, x + 10, y + current_text_position + 20 + scroll_offset_y);
+						current_text_position+= 20;
+						
+					}
+					while(word_index < words.length) // fit all the words!
+					current_text_position+= 10; // new messages indentation
+					
+				}
+				
+				
+				context.restore(); // unclip at the end
+			}
 		}
 	}
 )();

@@ -42,13 +42,16 @@ var Engine = (
 		var SELECTED_COLOUR = "green";
 		var MOVEMENT_COLOUR = "yellow";
 		var ATTACK_COLOUR = "red";
-
+		
+		// message box 
+		var message_box = [];
+		var message_box_scroll = 0;
 		// game variables 
 		var selected = {x:0,y:0};
 		var last_selected = {x:0,y:0};
 		
 		var player = "white";
-		var turns = 0;
+		var turns = 1;
 		return {
 			get cursor() { return cursor },
 			get cursor_x() { return cursor.x },
@@ -71,6 +74,8 @@ var Engine = (
 			
 			get player() { return player },
 			get turns() { return turns },
+			
+			get message_box() { return message_box },
 			
 			does_selected_piece_belong_to_player: function()
 			{
@@ -167,9 +172,20 @@ var Engine = (
 				}, 1000);
 			},
 			
-			notify: function()
+			notify: function(message)
 			{
+				
 				// add to on canvas message panel 
+				message_box.push("Turn " + turns + ": " + message.toString());
+				
+				
+				// delete first message if box is full 
+				var MAX_MESSAGES = 7;
+				if(message_box.length > MAX_MESSAGES)
+				{
+					message_box.shift();
+				}
+				
 			},
 			
 			toggle_pause: function()
@@ -233,6 +249,9 @@ var Engine = (
 								if(Board.move_piece(last_selected.x,last_selected.y
 									,selected.x,selected.y))
 								{
+									// move message 
+									Engine.notify("Moved " + Board.map[selected.x][selected.y].piece.name + " from " + AXIS_TEXT_X[last_selected.x] + AXIS_TEXT_Y[last_selected.y]
+										+ " to " + AXIS_TEXT_X[selected.x] + AXIS_TEXT_Y[selected.y]);
 									Engine.pass_turn();
 								}
 							}

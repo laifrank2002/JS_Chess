@@ -2,7 +2,6 @@
 // promote
 // en passant
 // castling
-// attacks
 // movement when "taking" a piece
 var Board = (
 	function()
@@ -11,6 +10,14 @@ var Board = (
 		var height = 8;
 		
 		var map = [];
+		var flags = {
+			white_king_moved: false,
+			white_left_rook_moved: false,
+			white_right_rook_moved: false,
+			black_king_moved: false,
+			black_left_rook_moved: false,
+			black_right_rook_moved: false,
+		};
 		return {
 			get width() { return width },
 			get height() { return height },
