@@ -15,7 +15,7 @@ var Board = (
 			white_left_rook_moved: false,
 			white_right_rook_moved: false,
 			black_king_moved: false,
-			black_left_rook_moved: false,
+			black_left_rook_moved: false, // left and right refers to pos as white player
 			black_right_rook_moved: false,
 		};
 		return {
@@ -150,16 +150,26 @@ var Board = (
 				}
 				else if (piece === pieces.BLACK_PAWN)
 				{
-					var possible_tiles = [{x:x,y:y-1}];
-					if (y === 6)
+					var possible_tiles = [];
+					if (Board.is_empty_tile(x,y-1))
 					{
-						// check if nothing is in front of it
-						if (map[x][y-1].piece === pieces.NONE)
+						possible_tiles.push({x:x,y:y-1});
+						if (Board.is_empty_tile(x,y-2))
 						{
-							possible_tiles.push({x:x,y:y-2})
+							if (y === 6)
+							{
+								// check if nothing is in front of it
+								if (map[x][y-1].piece === pieces.NONE)
+								{
+									possible_tiles.push({x:x,y:y-2})
+								}
+							}
 						}
 					}
-
+					// diagonal attack
+					if (!Board.is_empty_tile(x+1,y-1)) possible_tiles.push({x:x+1,y:y-1});
+					if (!Board.is_empty_tile(x-1,y-1)) possible_tiles.push({x:x-1,y:y-1});
+					
 					legal_tiles = possible_tiles.filter(tile => Board.is_legal_move(tile.x,tile.y))
 				}
 				return legal_tiles;
@@ -272,8 +282,87 @@ var Board = (
 			{
 				if (Board.is_legal_move(dx,dy))
 				{
+					/*
+					// to do, add in checking rules for check 
+					// if king is checked or moves to a checked position, ya can't castle 
+					// does not check for checks right now
+					// all the complicated rules for castling 
+					if (sy === 7)
+					{
+						if (sx === 0
+							&& !flags["black_left_rook_moved"] 
+							&& !flags["black_king_moved"]
+							&& dx === 4
+							&& dy === 7) // originate from king or rook!
+						{
+							
+							map[4][7].piece = pieces.BLACK_KING;
+							
+						}
+						if (sx === 7
+							&& !flags["black_right_rook_moved"] 
+							&& !flags["black_king_moved"]
+							&& dx === 4
+							&& dy === 7) // originate from king or rook!
+						{
+							
+						}
+						if (sx === 4
+							&& !flags["black_king_moved"])
+						{
+							if(!flags["black_left_rook_moved"] 
+								&& dx === 0
+								&& dy === 7)
+							{
+								
+							}
+							else if(!flags["black_right_rook_moved"] 
+								&& dx === 7
+								&& dy === 7)
+							{
+								
+							}
+						}
+					}
+					*/
+					// set flags 
+					// constantly setting them to true doesn't matter
+					// if it's moved, it's moved. if it's not the right piece,
+					// it's definetly moved 
+					if (sy === 7) // black row
+					{
+						if (sx === 0)
+						{
+							flags["black_left_rook_moved"] = true;
+						}
+						else if (sx === 7)
+						{
+							flags["black_right_rook_moved"] = true;
+						}
+						else if (sx === 4)
+						{
+							flags["black_king_moved"] = true;
+						}
+					}
+					if (sy === 0) // white row
+					{
+						if (sx === 0)
+						{
+							flags["white_left_rook_moved"] = true;
+						}
+						else if (sx === 7)
+						{
+							flags["white_right_rook_moved"] = true;
+						}
+						else if (sx === 4)
+						{
+							flags["white_king_moved"] = true;
+						}
+					}
+					// normal moving 
 					map[dx][dy].piece = map[sx][sy].piece;
 					map[sx][sy].piece = pieces.NONE;
+					
 					return true;	
 				}
 				return false;
